@@ -20,7 +20,7 @@ router.post("/register", async (req, res) => {
         let hashedPassword = await bcrypt.hash(req.body.password, 10);
         req.body.password = hashedPassword;
         let regToken = jwt.sign({email: req.body.email},process.env.REG_SECRET_KEY);
-            await db.collection("candidate").insertOne({ firstname:req.body.firstname, lastname:req.body.lastname, email:req.body.email, password:req.body.password, active:false, regToken:regToken});
+            await db.collection("candidate").insertOne({ firstname:req.body.firstname, lastname:req.body.lastname, degree:req.body.degree, email:req.body.email, password:req.body.password, active:false, appliedJobs: [], regToken:regToken});
             let mailTransporter = nodeMailer.createTransport({
               host: "smtp-mail.outlook.com",
               port: 587,
