@@ -58,7 +58,7 @@ router.get('/candidates-applied', isRecruiter, async (req, res) => {
     try {
         let client = await MongoClient.connect(dbUrl);
         let db = client.db("Job-Portal");
-        let data = await db.collection("candidate").find(appliedJobs.length>0).toArray();
+        let data = await db.collection("candidate").find({appliedJobs}).toArray();
         if (data) {
             res.status(200).json(data);
         } else {

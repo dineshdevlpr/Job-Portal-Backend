@@ -20,7 +20,7 @@ router.post("/register", async (req, res) => {
         let hashedPassword = await bcrypt.hash(req.body.password, 10);
         req.body.password = hashedPassword;
         let regToken = jwt.sign({email: req.body.email},process.env.REG_SECRET_KEY);
-            await db.collection("candidate").insertOne({ firstname:req.body.firstname, lastname:req.body.lastname, degree:req.body.degree, email:req.body.email, password:req.body.password, active:false, appliedJobs: [], regToken:regToken});
+            await db.collection("candidate").insertOne({ firstname:req.body.firstname, lastname:req.body.lastname, degree:req.body.degree, email:req.body.email, password:req.body.password, active:false, appliedJobs: [""], regToken:regToken});
             let mailTransporter = nodeMailer.createTransport({
               host: "smtp-mail.outlook.com",
               port: 587,
@@ -39,7 +39,7 @@ router.post("/register", async (req, res) => {
                 subject: "Account Activation link",
                 html: `<div>
                     <h3>Thanks for Registering.. Click on the below link to activate your account :)</h3>
-                    <a href="${feUrl+"activation/"+regToken}">Activate Account</a>
+                    <a href="${feUrl+"candidate/activation/"+regToken}">Activate Account</a>
                   </div>`,
               });
               console.log(mailDetails);
@@ -151,7 +151,7 @@ router.post("/register", async (req, res) => {
           subject: "Password Reset",
           html: `<div>
                     <h3>If You have requested for Password Reset, Click the following link to reset your password.If not requested, then just ignore this mail</h3>
-                    <a href="${feUrl+"reset/"+randomString}">RESET PASSWORD</a>
+                    <a href="${feUrl+"candidate/reset/"+randomString}">RESET PASSWORD</a>
                   </div>`,
         })   
         console.log(mailDetails)
@@ -172,16 +172,16 @@ router.post("/register", async (req, res) => {
   
   router.post("/reset/:randomString", async (req, res) => {
     try {
-      const client = await MongoClient.connect(dbUrl, {
+      let client = await MongoClient.connect(dbUrl, {
         useUnifiedTopology: true,
       });
-      const db = client.db("Job-Portal");
-      const userData = await db.collection("candidate").findOne({
+      let db = await client.db("Job-Portal");
+      let userData = await db.collection("candidate").findOne({
         randomString: req.params.randomString
       });
       if (userData) {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        const updated = await db
+        let hashedPassword = await bcrypt.hash(req.body.password, 10);
+        let updated = await db
           .collection("candidate")
           .updateOne(
             { randomString: req.params.randomString },

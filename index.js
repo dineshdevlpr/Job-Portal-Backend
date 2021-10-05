@@ -12,6 +12,7 @@ const authCandidate = require("./src/auth-routes/authCandidate")
 
 // job portal routes
 const recruiterPortal = require("./src/job-routes/recruiterPortal")
+const candidatePortal = require("./src/job-routes/candidatePortal")
 
 const app = express()
 
@@ -26,6 +27,7 @@ app.use(cors({
 app.use("/recruiter", authRecruiter)
 app.use("/candidate", authCandidate)
 app.use("/recruiter-portal", recruiterPortal)
+app.use("/candidate-portal", candidatePortal)
 
 
 
