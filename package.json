@@ -4,6 +4,7 @@
   "description": "This is the backend for Job Portal Site which is build with Node.js and with Express Server. This task is given by Domaincer.",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
