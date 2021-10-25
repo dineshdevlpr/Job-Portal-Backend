@@ -1,6 +1,6 @@
 const express = require('express')
 const router = require("express").Router();
-const { MongoClient, ObjectID } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const isCandidate = require("../middleware-authorization/isCandidate");
@@ -34,15 +34,26 @@ router.get('/listjobs', isCandidate, async (req, res) => {
 
 })
 
-router.put('/apply/:jobId/:email', isCandidate, async (req, res) => {
+router.put('/apply/:id', isCandidate, async (req, res) => {
     try {
         let client = await MongoClient.connect(dbUrl);
         let db = client.db("Job-Portal");
-        let job = await db.collection("jobs").find({jobId:req.params.jobId});
-        // console.log("This is JOB "+(job.forEach((obj)=>{return obj} )))
-        let updateAppliedJob = await db.collection("candidate").updateOne({email : req.params.email},{ $push :{ appliedJobs : (job.forEach((obj)=>{return obj} )) }});
+        let job = await db.collection("jobs").findOne({ _id : req.params.id});
+        
+        let updateAppliedJob = await db.collection("candidate").updateOne({email : req.body.email},{ $push :{ appliedJobs : job}});
+        // .aggregate([
+        //     {
+        //       $lookup:
+        //         {
+        //           from: "inventory",
+        //           localField: "item",
+        //           foreignField: "sku",
+        //           as: "inventory_docs"
+        //         }
+        //    }
+        //  ])
         if (updateAppliedJob) {
-            // console.log("UPDATED " + updateAppliedJob)
+            console.log("UPDATED " + updateAppliedJob)
             res.status(200).json(updateAppliedJob);
         } else {
             res.status(404).json({ message: "No Data Found" })
@@ -53,6 +64,9 @@ router.put('/apply/:jobId/:email', isCandidate, async (req, res) => {
         res.status(500)
     }
 })
+
+
+
 
 
 
