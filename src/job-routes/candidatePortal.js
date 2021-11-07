@@ -34,39 +34,65 @@ router.get('/listjobs', isCandidate, async (req, res) => {
 
 })
 
-router.put('/apply/:id', isCandidate, async (req, res) => {
+//apply to jobs
+router.put('/apply/:useremail/:id/:jobid/:description/:skills', isCandidate, async (req, res) => {
     try {
+        let userEmail = req.params.useremail
+        let id = req.params.id
+        let appliedJobId = req.params.jobid
+        let appliedJobDescription = req.params.description
+        let appliedJobSkills = req.params.skills
+        let appliedDate = new Date()
         let client = await MongoClient.connect(dbUrl);
-        let db = client.db("Job-Portal");
-        let job = await db.collection("jobs").findOne({ _id : req.params.id});
-        
-        let updateAppliedJob = await db.collection("candidate").updateOne({email : req.body.email},{ $push :{ appliedJobs : job}});
-        // .aggregate([
-        //     {
-        //       $lookup:
-        //         {
-        //           from: "inventory",
-        //           localField: "item",
-        //           foreignField: "sku",
-        //           as: "inventory_docs"
-        //         }
-        //    }
-        //  ])
-        if (updateAppliedJob) {
-            console.log("UPDATED " + updateAppliedJob)
-            res.status(200).json(updateAppliedJob);
-        } else {
-            res.status(404).json({ message: "No Data Found" })
+        let db = await client.db("Job-Portal");
+
+        //check if already applied
+        let isAlreadyApplied = await db.collection("jobs").findOne({ _id : ObjectId(id) , candidatesApplied :{email :userEmail} })
+        console.log(":::ALREADY APPLIED " +isAlreadyApplied)
+
+        //if not already applied then proceed to apply
+        if(!isAlreadyApplied){
+            // update applied candidate details in jobs collection
+            let updateCandidateApplied = await db.collection("jobs").updateOne({_id : ObjectId(id)},{ $push :{ candidatesApplied : {email : userEmail}}}, { upsert: true });
+            console.log(updateCandidateApplied)
+
+            //update applied job details in candidate collection
+            let jobApplied = await db.collection("candidate").updateOne({email :userEmail},{ $push :{ appliedJobs : {appliedJobId ,appliedJobDescription, appliedJobSkills, appliedDate}}}, { upsert: true } )
+            console.log(jobApplied)
+            client.close();
+            res.status(200).json({
+            message: "Successfully Applied",
+            });
+        }else{
+            res.status(400).json({
+                message: `User With ${userEmail} already applied for this job`,
+              });
         }
-        client.close();
     } catch (error) {
         console.log(error)
         res.status(500)
     }
 })
 
+// view applied jobs
+router.get('/appliedjobs/:useremail', isCandidate, async (req, res) => {
+    try {
+        let userEmail = req.params.useremail
+        let client = await MongoClient.connect(dbUrl);
+        let db = client.db("Job-Portal");
+        let appliedJobLists = await db.collection("jobs").find({ candidatesApplied :{email :userEmail} }).toArray()
+        if (appliedJobLists) {
+            res.status(200).json(appliedJobLists)
+        } else {
+            res.status(400).json({ message: "No Jobs Applied" })
+        }
+        client.close();
+    } catch (error) {
+        console.log(error)
+        res.status(500)
+    }
 
-
+})
 
 
 

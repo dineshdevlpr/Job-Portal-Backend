@@ -1,6 +1,6 @@
 const express = require('express')
 const router = require("express").Router();
-const { MongoClient, ObjectID } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const isRecruiter = require("../middleware-authorization/isRecruiter");
@@ -54,16 +54,53 @@ router.get('/listjobs', isRecruiter, async (req, res) => {
 
 })
 
-router.get('/candidates-applied', isRecruiter, async (req, res) => {
+// view candidates applied for particular job
+router.get('/candidates-applied/:id', isRecruiter, async (req, res) => {
     try {
+        let id = req.params.id
         let client = await MongoClient.connect(dbUrl);
         let db = client.db("Job-Portal");
-        let data = await db.collection("candidate").find({appliedJobs}).toArray();
-        if (data) {
-            res.status(200).json(data);
+        let data = await db.collection("jobs").findOne({ _id : ObjectId(id) });
+        let candidatesApplied = data.candidatesApplied
+        if (candidatesApplied) {
+            res.status(200).json(candidatesApplied);
+        } else {
+            res.status(400).json({ message: "No Applications Received" })
+        }
+        client.close();
+    } catch (error) {
+        console.log(error)
+        res.status(500)
+    }
+})
+
+// update particular job
+router.put('/updatejob/:id', isRecruiter, async (req, res) => {
+    try {
+        let id = req.params.id
+        let client = await MongoClient.connect(dbUrl);
+        let db = client.db("Job-Portal");
+        let update = await db.collection("jobs").updateOne({_id : ObjectId(id)},{ $set: { jobId : req.body.jobId, description : req.body.description , skills : req.body.skills , updatedDate : new Date().toLocaleDateString()}}, { upsert : true });
+        if (update) {
+            res.status(200).json(update);
         } else {
             res.status(404).json({ message: "No Data Found" })
         }
+        client.close();
+    } catch (error) {
+        console.log(error)
+        res.status(500)
+    }
+})
+
+//delete particular job
+router.delete('/deletejob/:id', isRecruiter, async (req, res) => {
+    try {
+        let id = req.params.id
+        let client = await MongoClient.connect(dbUrl);
+        let db = client.db("Job-Portal");
+        await db.collection("jobs").deleteOne({_id : ObjectId(id)});
+        res.status(200).json({ message: "Successfully Deleted" })
         client.close();
     } catch (error) {
         console.log(error)
