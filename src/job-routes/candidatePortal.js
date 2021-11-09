@@ -42,7 +42,7 @@ router.put('/apply/:useremail/:id/:jobid/:description/:skills', isCandidate, asy
         let appliedJobId = req.params.jobid
         let appliedJobDescription = req.params.description
         let appliedJobSkills = req.params.skills
-        let appliedDate = new Date()
+        let appliedDate = new Date().toLocaleDateString()
         let client = await MongoClient.connect(dbUrl);
         let db = await client.db("Job-Portal");
 
