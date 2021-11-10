@@ -53,7 +53,7 @@ router.put('/apply/:useremail/:id/:jobid/:description/:skills', isCandidate, asy
         //if not already applied then proceed to apply
         if(!isAlreadyApplied){
             // update applied candidate details in jobs collection
-            let updateCandidateApplied = await db.collection("jobs").updateOne({_id : ObjectId(id)},{ $push :{ candidatesApplied : {email : userEmail}}}, { upsert: true });
+            let updateCandidateApplied = await db.collection("jobs").updateOne({_id : ObjectId(id)},{ $push :{ candidatesApplied : {email : userEmail , appliedDate}}}, { upsert: true });
             console.log(updateCandidateApplied)
 
             //update applied job details in candidate collection
