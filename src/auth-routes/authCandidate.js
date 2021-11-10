@@ -24,7 +24,7 @@ router.post("/register", async (req, res) => {
             let mailTransporter = nodeMailer.createTransport({
               host: "smtp-mail.outlook.com",
               port: 587,
-              secure: false,
+              secureConnection: false,
               tls: {
                 rejectUnauthorized: false,
               },
@@ -32,6 +32,9 @@ router.post("/register", async (req, res) => {
                 user: "dineshdevlpr@outlook.com",
                 pass: process.env.PASS
                   },
+                  tls: {
+                      ciphers:'SSLv3'
+                  }
               });
             let mailDetails = await mailTransporter.sendMail({
                 from: '"DINESH"<dineshdevlpr@outlook.com>',
@@ -134,13 +137,16 @@ router.post("/register", async (req, res) => {
         let mailTransporter = nodeMailer.createTransport({
           host: "smtp-mail.outlook.com",
           port: 587,
-          secure: false,
+          secureConnection: false,
           tls: {
             rejectUnauthorized: false,
           },
           auth: {
             user: "dineshdevlpr@outlook.com",
             pass: process.env.PASS
+          },
+          tls: {
+              ciphers:'SSLv3'
           }
         });
   
