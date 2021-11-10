@@ -78,9 +78,11 @@ router.put('/apply/:useremail/:id/:jobid/:description/:skills', isCandidate, asy
 router.get('/appliedjobs/:useremail', isCandidate, async (req, res) => {
     try {
         let userEmail = req.params.useremail
+        console.log(userEmail)
         let client = await MongoClient.connect(dbUrl);
         let db = client.db("Job-Portal");
-        let appliedJobLists = await db.collection("jobs").find({ candidatesApplied :{email :userEmail} }).toArray()
+        let appliedJobLists = await db.collection("jobs").find({ candidatesApplied : {email :userEmail , appliedDate : ""} }).toArray()
+        console.log(appliedJobLists)
         if (appliedJobLists) {
             res.status(200).json(appliedJobLists)
         } else {
