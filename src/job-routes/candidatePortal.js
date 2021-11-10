@@ -53,7 +53,7 @@ router.put('/apply/:useremail/:id/:jobid/:description/:skills', isCandidate, asy
         //if not already applied then proceed to apply
         if(!isAlreadyApplied){
             // update applied candidate details in jobs collection
-            let updateCandidateApplied = await db.collection("jobs").updateOne({_id : ObjectId(id)},{ $push :{ candidatesApplied : {email : userEmail , appliedDate}}}, { upsert: true });
+            let updateCandidateApplied = await db.collection("jobs").updateOne({_id : ObjectId(id)},{ $push :{ candidatesApplied : {email : userEmail }}}, { upsert: true });
             console.log(updateCandidateApplied)
 
             //update applied job details in candidate collection
@@ -81,7 +81,7 @@ router.get('/appliedjobs/:useremail', isCandidate, async (req, res) => {
         console.log(userEmail)
         let client = await MongoClient.connect(dbUrl);
         let db = client.db("Job-Portal");
-        let appliedJobLists = await db.collection("jobs").find({ candidatesApplied : {email :userEmail , appliedDate : ""} }).toArray()
+        let appliedJobLists = await db.collection("jobs").find({ candidatesApplied : {email :userEmail} }).toArray()
         console.log(appliedJobLists)
         if (appliedJobLists) {
             res.status(200).json(appliedJobLists)
