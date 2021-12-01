@@ -74,6 +74,27 @@ router.get('/candidates-applied/:id', isRecruiter, async (req, res) => {
     }
 })
 
+//view particular job
+
+router.get('/updatejob/:id', isRecruiter, async (req, res) => {
+    try {
+        let id = req.params.id
+        let client = await MongoClient.connect(dbUrl);
+        let db = client.db("Job-Portal");
+        let job = await db.collection("jobs").findOne({_id : ObjectId(id)})
+        if (job) {
+            res.status(200).json(job);
+        } else {
+            res.status(404).json({ message: "No Data Found" })
+        }
+        client.close();
+    } catch (error) {
+        console.log(error)
+        res.status(500)
+    }
+
+})
+
 // update particular job
 router.put('/updatejob/:id', isRecruiter, async (req, res) => {
     try {
